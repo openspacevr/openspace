@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "389505709461",
+    "firebase_url": "https://openspace-2418d.firebaseio.com",
+    "project_id": "openspace-2418d",
+    "storage_bucket": "openspace-2418d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:389505709461:android:55ad42292dc3c7c1",
+        "android_client_info": {
+          "package_name": "com.acmevirtual.openspace"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "389505709461-knus9066fasid48rrc6pi74aobr993bj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.acmevirtual.openspace",
+            "certificate_hash": "417a569e2d461f10019811506744a3224b1f0de2"
+          }
+        },
+        {
+          "client_id": "389505709461-2m23n8m5ek6rbrc5j75lenob8s9tqs82.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.acmevirtual.openspace",
+            "certificate_hash": "d129ea412ed19536be8b0f2ad488b0408153e2fd"
+          }
+        },
+        {
+          "client_id": "389505709461-etkicnpbupg85jrbtl4a2ib44tb20qp7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArboTxIzeM0k6AwemZtx0HnY1idLDOHUM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "389505709461-etkicnpbupg85jrbtl4a2ib44tb20qp7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
