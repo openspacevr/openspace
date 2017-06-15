@@ -17,10 +17,13 @@ public class User {
 		this.uid = uid;
 		//This will be updated when the user verifies their email.
 		this.verified = false;
+		this.symptoms.Add ("All.");
+		this.symptoms.Add ("Anything.");
 		for (int i = 0; i < symptoms.Capacity; i++) {
 			this.symptoms.Add (symptoms [i]);
-			Debug.Log (this.symptoms [i]);
+			Debug.Log ("Symptoms: " + this.symptoms [i]);
 		}
+
 
 	}
 }

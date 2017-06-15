@@ -5,50 +5,53 @@ using Firebase;
 using Firebase.Auth;
 using Firebase.Database;
 using UnityEngine.UI;
-
+//	This class handles the registration of the u
 public class Registration : MonoBehaviour {
 
 	FirebaseAuth auth;
 	DatabaseReference dbReference;
+	GameManager instanceGameManager;
+	MentalHealth instanceMentalHealth;
+	int count;
 	private string email = "undefined";
 	private string password = "undefined";
-	private GameManager instanceGameManager;
 
-	MentalHealth mentalHealthInstance;
-	GameObject[] buttons;
-	private int count = 0;
-
-	enum UserFlow {Choice, SignUp, SignIn, Complete};
-	UserFlow sessionFlow;
-
-	//	List containing our panels: 0 choicePanel 1 signUpPanel 2 signInPanel 3 problemsPanel 4 inGamePanel
-	//	5 connectPanel
-	[SerializeField] private List<GameObject> panels = new List<GameObject> (6);
+	// 0 choicePanel 1 signUpPanel 2 signInPanel 3 problemsPanel 4 inGamePanel 5 connectPanel
+	[SerializeField] private List<GameObject> panels = new List<GameObject> ();
 	[SerializeField] private List<string> symptoms = new List<string> ();
 	[SerializeField] private GameObject button;
+	[SerializeField] private List<GameObject> buttons = new List<GameObject> ();
+
+
 	// Use this for initialization
 	void Start () {
-
+		//Class References
 		instanceGameManager = GameManager.instanceGameManager;
-
-		mentalHealthInstance = ScriptableObject.CreateInstance<MentalHealth>();
-		buttons = new GameObject[mentalHealthInstance.problems.Length];
+		instanceMentalHealth = ScriptableObject.CreateInstance<MentalHealth>();
 		dbReference = FirebaseDatabase.DefaultInstance.RootReference;
 
-		//The FirebaseAuth class is the gateway for all API calls. 
-		auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
-		//DisablingVr mode in order to allow user register through sign up form.
-		sessionFlow = UserFlow.Choice;
-		panels[1].SetActive (false);
-		panels[2].SetActive (false);
-		panels[3].SetActive (false);
+		auth = instanceGameManager.auth;
+		//Deactivating ui panels.
+		foreach(GameObject p in panels){
+			p.SetActive(false);
+		}
+		panels [0].SetActive (true);
+
+	}
+
+
+	void ShowPanel(GameObject panel){
+		foreach(GameObject p in panels){
+			p.SetActive(false);
+		}
+		panel.SetActive (true);
 	}
 
 	void SetSymtoms(){
 
-		for (int i = 0; i < mentalHealthInstance.problems.Length; i++) {
+		for (int i = 0; i < instanceMentalHealth.problems.Length; i++) {
 			button = Instantiate (button,panels[3].transform);
-			button.GetComponentInChildren<Text> ().text = mentalHealthInstance.problems [i];
+			button.GetComponentInChildren<Text> ().text = instanceMentalHealth.problems [i];
 			button.SetActive (false);
 			buttons [i] = button;
 		}
@@ -64,14 +67,13 @@ public class Registration : MonoBehaviour {
 		
 	public void SignUp(){
 		
-
 		auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWith(task => {
 			if (task.IsCanceled) {
-				Debug.LogError("CreateUserWithEmailAndPasswordAsync was canceled.");
+				Device.device.Log(0,"CreateUserWithEmailAndPasswordAsync was canceled.");
 				return;
 			}
 			if (task.IsFaulted) {
-				Debug.LogError("CreateUserWithEmailAndPasswordAsync encountered an error: " + task.Exception);
+				Device.device.Log(0,"CreateUserWithEmailAndPasswordAsync encountered an error: " + task.Exception);
 				return;
 			}
 
@@ -79,9 +81,13 @@ public class Registration : MonoBehaviour {
 			Firebase.Auth.FirebaseUser newUser = task.Result;
 			Debug.LogFormat("Firebase user created successfully: {0} ({1})",
 				newUser.DisplayName, newUser.UserId);
+			instanceGameManager.localUser = WriteNewUser(email, newUser.UserId, symptoms);
+			Device.device.Log(instanceGameManager.localUser.symptoms[0]);
+
 		});
 
-		Debug.Log ("<color=green>Register: </color>" + email + " " + password);
+		Device.device.Log(1,email + " " + password);
+
 		SignIn ();
 	}
 
@@ -89,22 +95,23 @@ public class Registration : MonoBehaviour {
 
 		auth.SignInWithEmailAndPasswordAsync(email, password).ContinueWith(task => {
 		if (task.IsCanceled) {
-			Debug.LogError("SignInWithEmailAndPasswordAsync was canceled.");
+				Device.device.Log(0,"SignInWithEmailAndPasswordAsync was canceled.");
 			return;
 		}
 		if (task.IsFaulted) {
-			Debug.LogError("SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
+				Device.device.Log(0,"SignInWithEmailAndPasswordAsync encountered an error: " + task.Exception);
 			return;
 		}
 
 		Firebase.Auth.FirebaseUser newUser = task.Result;
-		Debug.LogFormat("User signed in successfully: {0} ({1})",
+			Debug.LogFormat("User signed in successfully: {0} ({1})",
 			newUser.DisplayName, newUser.UserId);
-			GameManager.instanceGameManager.StateManager(GameManager.GameState.Registered);
-
+			Device.device.Log("User signed in successfully: {0} ({1})" +
+				newUser.DisplayName + newUser.UserId);
+			Device.device.Log(1, "User signed in succesfully");
 			GenerateIDToken ();
 	});
-			
+		panels [5].SetActive (true);
 	
 	}
 		
@@ -113,24 +120,23 @@ public class Registration : MonoBehaviour {
 		Firebase.Auth.FirebaseUser user = auth.CurrentUser;
 		user.TokenAsync(true).ContinueWith(task => {
 			if (task.IsCanceled) {
-				Debug.LogError("TokenAsync was canceled.");
+				Device.device.Log(0,"TokenAsync was canceled.");
 				return;
 			}
 
 			if (task.IsFaulted) {
-				Debug.LogError("TokenAsync encountered an error: " + task.Exception);
+				Device.device.Log(0,"TokenAsync encountered an error: " + task.Exception);
 				return;
 			}
 
 			string idToken = task.Result;
-			Debug.Log("<color=green> Success! </color>"+idToken);
-			Debug.Log("<color=green> Success! </color>"+ "Firebase Current UserId: " + auth.CurrentUser.UserId+ "Firebase UserId: " + user.UserId);
+			Device.device.Log(1,idToken);
+			Device.device.Log(1, "Firebase Current UserId: " + auth.CurrentUser.UserId+ "Firebase UserId: " + user.UserId);
 
-			writeNewUser(email, user.UserId, symptoms);
 		});
 	}
 
-	private void writeNewUser(string email, string uid, List<string> symptoms) {
+	private User WriteNewUser(string email, string uid, List<string> symptoms) {
 
 		User user = new User(email, uid, symptoms);
 		string json = JsonUtility.ToJson(user);
@@ -138,13 +144,16 @@ public class Registration : MonoBehaviour {
 		FirebaseDatabase.DefaultInstance.GetReference ("users").Child(uid).SetRawJsonValueAsync (json).ContinueWith (task => {
 			if(task.IsFaulted){
 				//Handle Error
-				Debug.Log("<color=red> Error! </color>" + " Sending user info failed.");
+				Device.device.Log(0, " Sending user info failed.");
 
 			}else if(task.IsCompleted){
 				//Resend Data or ask to resend.
-				Debug.Log("<color=green> Success! </color>" + " Sending user info complete!");
+				Device.device.Log(1," Sending user info complete!");
 			}
 		});
+
+		return user;
+
 	}
 
 	public void ShowSymptoms(){
@@ -158,7 +167,7 @@ public class Registration : MonoBehaviour {
 		}
 
 		count += nob;
-		if (count == mentalHealthInstance.problems.Length)
+		if (count == instanceMentalHealth.problems.Length)
 			count = 0;
 		Debug.Log (count);
 	}
@@ -182,13 +191,11 @@ public class Registration : MonoBehaviour {
 	}
 
 	public void SignInButton(){
-		sessionFlow = UserFlow.SignIn;
 		panels[0].SetActive (false);
 		panels[2].SetActive (true);
 	}
 
 	public void SignUpBotton(){
-		sessionFlow = UserFlow.SignUp;
 		panels[0].SetActive (false);
 		panels[1].SetActive (true);
 	}
