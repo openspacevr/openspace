@@ -199,10 +199,6 @@ public class Registration : MonoBehaviour {
 		panels[0].SetActive (false);
 		panels[1].SetActive (true);
 	}
-
-	public void ConnectButton(){
-		instanceGameManager.instanceRandomMatchmaker.Connect (instanceGameManager.version);
-	}
 		
 	public void OnClick(){
 

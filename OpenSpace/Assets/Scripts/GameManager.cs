@@ -14,7 +14,6 @@ public class GameManager : MonoBehaviour {
 
 	[SerializeField] public Registration instanceRegistration;
 	[SerializeField] public Database instanceDatabase;
-	[SerializeField] public RandomMatchmaker instanceRandomMatchmaker;
 
 	public FirebaseAuth auth;
 	Firebase.Auth.FirebaseUser user;
@@ -24,9 +23,6 @@ public class GameManager : MonoBehaviour {
 
 	public string version;
 	DeviceOrientation myOrientation;
-
-
-
 
 	public enum GameState 
 	{
